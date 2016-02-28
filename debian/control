@@ -20,7 +20,7 @@ Build-Depends-Indep: python-babel,
 Standards-Version: 3.9.6
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/python-django-babel.git
 Vcs-Git: git://anonscm.debian.org/openstack/python-django-babel.git
-Homepage: http://github.com/graingert/django-babel/
+Homepage: https://github.com/graingert/django-babel/
 
 Package: python-django-babel
 Architecture: all

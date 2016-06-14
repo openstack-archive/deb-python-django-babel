@@ -1,4 +1,4 @@
-python-django-babel (0.5.1-1) unstable; urgency=medium
+python-django-babel (0.5.1-1) experimental; urgency=medium
 
   [ Ondřej Nový ]
   * Fixed homepage (https).

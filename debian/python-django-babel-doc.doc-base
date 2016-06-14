@@ -1,0 +1,9 @@
+Document: python-django-babel-doc
+Title: django-babel Documentation
+Author: N/A
+Abstract: Sphinx documentation for django-babel
+Section: Programming/Python
+
+Format: HTML
+Index: /usr/share/doc/python-django-babel-doc/html/index.html
+Files: /usr/share/doc/python-django-babel-doc/html/*

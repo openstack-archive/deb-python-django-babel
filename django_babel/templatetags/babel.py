@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 
+from babel import support as babel_support
+from babel import core as babel_core
 from django.conf import settings
 from django.template import Library
 from django.utils.translation import to_locale, get_language
@@ -10,9 +13,10 @@ except ImportError:
 
 from django_babel.middleware import get_current_locale
 
-babel = __import__('babel', {}, {}, ['core', 'support'])
-Format = babel.support.Format
-Locale = babel.core.Locale
+__all__ = [
+    'datefmt', 'datetimefmt', 'timefmt', 'numberfmt', 'decimalfmt',
+    'currencyfmt', 'percentfmt', 'scientificfmt',
+]
 
 register = Library()
 
@@ -20,12 +24,12 @@ register = Library()
 def _get_format():
     locale = get_current_locale()
     if not locale:
-        locale = Locale.parse(to_locale(get_language()))
+        locale = babel_core.Locale.parse(to_locale(get_language()))
     if timezone:
         tzinfo = timezone(settings.TIME_ZONE)
     else:
         tzinfo = None
-    return Format(locale, tzinfo)
+    return babel_support.Format(locale, tzinfo)
 
 
 def datefmt(date=None, format='medium'):

@@ -1,21 +1,31 @@
 language: python
-python: 2.7
+python: 3.4
+sudo: false
 env:
-  - TOX_ENV=py33-master
-  - TOX_ENV=py33-1.7.x
-  - TOX_ENV=py33-1.6.x
-  - TOX_ENV=py33-1.5.x
-  - TOX_ENV=pypy-master
-  - TOX_ENV=pypy-1.7.x
-  - TOX_ENV=pypy-1.6.x
-  - TOX_ENV=pypy-1.5.x
-  - TOX_ENV=py27-master
-  - TOX_ENV=py27-1.7.x
-  - TOX_ENV=py27-1.6.x
-  - TOX_ENV=py27-1.5.x
-  - TOX_ENV=py26-1.5.x
+  - TOX_ENV=py27-django15
+  - TOX_ENV=py27-django16
+  - TOX_ENV=py27-django17
+  - TOX_ENV=py27-django18
+  - TOX_ENV=py27-django19
+  - TOX_ENV=py27-djangomaster
+  - TOX_ENV=py34-django15
+  - TOX_ENV=py34-django16
+  - TOX_ENV=py34-django17
+  - TOX_ENV=py34-django18
+  - TOX_ENV=py34-django19
+  - TOX_ENV=py34-djangomaster
+  - TOX_ENV=py33-django15
+  - TOX_ENV=py33-django16
+  - TOX_ENV=py33-django17
+  - TOX_ENV=py33-django18
+  - TOX_ENV=py26-django15
+  - TOX_ENV=py26-django16
+  - TOX_ENV=lint
+  - TOX_ENV=docs
 install:
-  - pip install tox
+- pip install tox
 script:
-  - tox -e $TOX_ENV
-
+- tox -e $TOX_ENV
+cache:
+  directories:
+    - $HOME/.cache/pip

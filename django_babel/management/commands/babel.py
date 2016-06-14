@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import os
 from distutils.dist import Distribution
 from optparse import make_option
@@ -8,22 +8,29 @@ from django.core.management.base import LabelCommand, CommandError
 from django.conf import settings
 
 
+__all__ = ['Command']
+
+
 class Command(LabelCommand):
 
     args = '[makemessages] [compilemessages]'
 
     option_list = LabelCommand.option_list + (
         make_option(
-            '--locale', '-l',
-            default=None, dest='locale', action='append',
-            help='Creates or updates the message files for the given locale(s)'
-                 ' (e.g pt_BR). Can be used multiple times.'),
-        make_option('--domain', '-d',
-            default='django', dest='domain',
-            help='The domain of the message files (default: "django").'),
-        make_option('--mapping-file', '-F',
-            default=None, dest='mapping_file',
-            help='Mapping file')
+            '--locale', '-l', default=None, dest='locale', action='append',
+            help=(
+                'Creates or updates the message files for the given locale(s)'
+                ' (e.g pt_BR). Can be used multiple times.'
+            ),
+        ),
+        make_option(
+            '--domain', '-d', default='django', dest='domain',
+            help='The domain of the message files (default: "django").',
+        ),
+        make_option(
+            '--mapping-file', '-F', default=None, dest='mapping_file',
+            help='Mapping file',
+        )
     )
 
     def handle_label(self, command, **options):
@@ -58,8 +65,13 @@ class Command(LabelCommand):
 
         for path in locale_paths:
             potfile = os.path.join(path, '%s.pot' % domain)
+
+            if not os.path.exists(path):
+                os.makedirs(path)
+
             if not os.path.exists(potfile):
-                continue
+                with open(potfile, 'wb') as fobj:
+                    fobj.write(b'')
 
             cmd = ['pybabel', 'extract', '-o', potfile]
 
@@ -71,6 +83,19 @@ class Command(LabelCommand):
             call(cmd)
 
             for locale in locales:
+                pofile = os.path.join(
+                    os.path.dirname(potfile),
+                    locale,
+                    'LC_MESSAGES',
+                    '%s.po' % domain)
+
+                if not os.path.isdir(os.path.dirname(pofile)):
+                    os.makedirs(os.path.dirname(pofile))
+
+                if not os.path.exists(pofile):
+                    with open(pofile, 'wb') as fobj:
+                        fobj.write(b'')
+
                 cmd = ['pybabel', 'update', '-D', domain,
                        '-i', potfile,
                        '-d', os.path.relpath(path),

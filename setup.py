@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-import sys
 import codecs
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
 
 
 def read(*parts):
@@ -13,62 +11,22 @@ def read(*parts):
         return fp.read()
 
 
-test_requires = [
-    'coverage',
-    'pytest',
-    'pytest-cov>=1.4',
-    'pytest-flakes',
-    'pytest-pep8',
-    'python-coveralls',
-]
-
-
-install_requires = [
-    'Django>=1.4,<1.7',
-    'Babel>=1.3',
-]
-
-
-dev_requires = [
-    'flake8>=2.0',
-    'invoke',
-    'twine'
-]
-
-
-class PyTest(TestCommand):
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        # import here, cause outside the eggs aren't loaded
-        import pytest
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
-
-
 setup(
     name='django-babel',
     description='Utilities for using Babel in Django',
     long_description=read('README.rst') + u'\n\n' + read('CHANGELOG.rst'),
-    version='0.4-dev',
+    version='0.5.1',
     license='BSD',
     author='Christopher Grebs',
     author_email='cg@webshox.org',
-    url='http://github.com/graingert/django-babel/',
+    maintainer='Thomas Grainger',
+    maintainer_email='django-babel@graingert.co.uk',
+    url='https://github.com/python-babel/django-babel/',
     packages=find_packages(exclude=('tests',)),
-    tests_require=test_requires,
-    install_requires=install_requires,
-    cmdclass={'test': PyTest},
-    extras_require={
-        'docs': ['sphinx'],
-        'tox': ['tox'],
-        'tests': test_requires,
-        'dev': dev_requires,
-    },
+    install_requires=[
+        'django>=1.4,<1.10',
+        'babel>=1.3',
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
@@ -82,14 +40,13 @@ setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
     entry_points={
         'babel.extractors': [
-            'django = babeldjango.extract:extract_django',
+            'django = django_babel.extract:extract_django',
         ]
     }
 )

@@ -1,8 +1,42 @@
 # -*- coding: utf-8 -*-
-from django.template import Lexer, TOKEN_TEXT, TOKEN_VAR, TOKEN_BLOCK
+try:
+    from django.template import Lexer, TOKEN_TEXT, TOKEN_VAR, TOKEN_BLOCK
+except ImportError:
+    # Django 1.8 moved most stuff to .base
+    from django.template.base import Lexer, TOKEN_TEXT, TOKEN_VAR, TOKEN_BLOCK
+
+try:
+    from django.utils.translation import trim_whitespace as trim_django
+except ImportError:
+    trim_django = False
+
+from django.utils.encoding import smart_text
 from django.utils.translation.trans_real import (
     inline_re, block_re, endblock_re, plural_re, constant_re)
-from django.utils.encoding import smart_unicode
+
+
+def trim_whitespace(string):
+    """Trim whitespace.
+
+    This is only supported in Django>=1.7. This method help in cases of older
+    Django versions.
+    """
+    if trim_django:
+        return trim_django(string)
+    return string
+
+
+def join_tokens(tokens, trim=False):
+    message = ''.join(tokens)
+    if trim:
+        message = trim_whitespace(message)
+    return message
+
+
+def strip_quotes(s):
+    if (s[0] == s[-1]) and s.startswith(("'", '"')):
+        return s[1:-1]
+    return s
 
 
 def extract_django(fileobj, keywords, comment_tags, options):
@@ -20,6 +54,8 @@ def extract_django(fileobj, keywords, comment_tags, options):
     """
     intrans = False
     inplural = False
+    trimmed = False
+    message_context = None
     singular = []
     plural = []
     lineno = 1
@@ -27,7 +63,14 @@ def extract_django(fileobj, keywords, comment_tags, options):
     encoding = options.get('encoding', 'utf8')
     text = fileobj.read().decode(encoding)
 
-    for t in Lexer(text, None).tokenize():
+    try:
+        text_lexer = Lexer(text)
+    except TypeError:
+        # Django 1.9 changed the way we invoke Lexer; older versions
+        # require two parameters.
+        text_lexer = Lexer(text, None)
+
+    for t in text_lexer.tokenize():
         lineno += t.contents.count('\n')
         if intrans:
             if t.token_type == TOKEN_BLOCK:
@@ -35,21 +78,41 @@ def extract_django(fileobj, keywords, comment_tags, options):
                 pluralmatch = plural_re.match(t.contents)
                 if endbmatch:
                     if inplural:
-                        yield (
-                            lineno,
-                            'ngettext',
-                            (smart_unicode(u''.join(singular)),
-                             smart_unicode(u''.join(plural))),
-                            [])
+                        if message_context:
+                            yield (
+                                lineno,
+                                'npgettext',
+                                [smart_text(message_context),
+                                 smart_text(join_tokens(singular, trimmed)),
+                                 smart_text(join_tokens(plural, trimmed))],
+                                [],
+                            )
+                        else:
+                            yield (
+                                lineno,
+                                'ngettext',
+                                (smart_text(join_tokens(singular, trimmed)),
+                                 smart_text(join_tokens(plural, trimmed))),
+                                [])
                     else:
-                        yield (
-                            lineno,
-                            None,
-                            smart_unicode(u''.join(singular)),
-                            [])
+                        if message_context:
+                            yield (
+                                lineno,
+                                'pgettext',
+                                [smart_text(message_context),
+                                 smart_text(join_tokens(singular, trimmed))],
+                                [],
+                            )
+                        else:
+                            yield (
+                                lineno,
+                                None,
+                                smart_text(join_tokens(singular, trimmed)),
+                                [])
 
                     intrans = False
                     inplural = False
+                    message_context = None
                     singular = []
                     plural = []
                 elif pluralmatch:
@@ -74,26 +137,41 @@ def extract_django(fileobj, keywords, comment_tags, options):
                 cmatches = constant_re.findall(t.contents)
                 if imatch:
                     g = imatch.group(1)
-                    if g[0] == '"':
-                        g = g.strip('"')
-                    elif g[0] == "'":
-                        g = g.strip("'")
-                    yield lineno, None, smart_unicode(g), []
+                    g = strip_quotes(g)
+                    message_context = imatch.group(3)
+                    if message_context:
+                        # strip quotes
+                        message_context = message_context[1:-1]
+                        yield (
+                            lineno,
+                            'pgettext',
+                            [smart_text(message_context), smart_text(g)],
+                            [],
+                        )
+                        message_context = None
+                    else:
+                        yield lineno, None, smart_text(g), []
                 elif bmatch:
+                    if bmatch.group(2):
+                        message_context = bmatch.group(2)[1:-1]
                     for fmatch in constant_re.findall(t.contents):
-                        yield lineno, None, smart_unicode(fmatch), []
+                        stripped_fmatch = strip_quotes(fmatch)
+                        yield lineno, None, smart_text(stripped_fmatch), []
                     intrans = True
                     inplural = False
+                    trimmed = 'trimmed' in t.split_contents()
                     singular = []
                     plural = []
                 elif cmatches:
                     for cmatch in cmatches:
-                        yield lineno, None, smart_unicode(cmatch), []
+                        stripped_cmatch = strip_quotes(cmatch)
+                        yield lineno, None, smart_text(stripped_cmatch), []
             elif t.token_type == TOKEN_VAR:
                 parts = t.contents.split('|')
                 cmatch = constant_re.match(parts[0])
                 if cmatch:
-                    yield lineno, None, smart_unicode(cmatch.group(1)), []
+                    stripped_cmatch = strip_quotes(cmatch.group(1))
+                    yield lineno, None, smart_text(stripped_cmatch), []
                 for p in parts[1:]:
                     if p.find(':_(') >= 0:
                         p1 = p.split(':', 1)[1]
@@ -101,8 +179,5 @@ def extract_django(fileobj, keywords, comment_tags, options):
                             p1 = p1[1:]
                         if p1[0] == '(':
                             p1 = p1.strip('()')
-                        if p1[0] == "'":
-                            p1 = p1.strip("'")
-                        elif p1[0] == '"':
-                            p1 = p1.strip('"')
-                        yield lineno, None, smart_unicode(p1), []
+                        p1 = strip_quotes(p1)
+                        yield lineno, None, smart_text(p1), []

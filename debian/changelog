@@ -1,11 +1,16 @@
-python-django-babel (0.4.0-2) UNRELEASED; urgency=medium
+python-django-babel (0.5.1-1) unstable; urgency=medium
 
+  [ Ondřej Nový ]
   * Fixed homepage (https).
   * Fixed VCS URLs (https).
   * d/rules: Changed UPSTREAM_GIT protocol to https
   * d/copyright: Changed source URL to https protocol
 
- -- Ondřej Nový <novy@ondrej.org>  Sun, 28 Feb 2016 15:35:45 +0100
+  [ Ivan Udovichenko ]
+  * Package new release.
+  * Add myself to uploaders field.
+
+ -- Ivan Udovichenko <iudovichenko@mirantis.com>  Tue, 14 Jun 2016 13:35:11 +0300
 
 python-django-babel (0.4.0-1) unstable; urgency=medium
 

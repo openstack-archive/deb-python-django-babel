@@ -3,7 +3,7 @@ Upstream-Name: django-babel
 Source: https://github.com/graingert/django-babel/
 
 Files: debian/*
-Copyright: (c) 2015, Thomas Goirand <zigo@debian.org>
+Copyright: (c) 2015-2016, Thomas Goirand <zigo@debian.org>
 License: BSD-3-clause
 
 Files: *

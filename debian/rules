@@ -28,7 +28,7 @@ override_dh_auto_install:
 #endif
 
 override_dh_sphinxdoc:
-	sphinx-build -b html docs debian/python-django-babel-doc/usr/share/doc/python-django-babel-doc/html
+	PYTHONPATH=. sphinx-build -b html docs debian/python-django-babel-doc/usr/share/doc/python-django-babel-doc/html
 	dh_sphinxdoc -O--buildsystem=python_distutils
 
 

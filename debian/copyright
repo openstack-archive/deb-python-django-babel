@@ -2,13 +2,13 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: django-babel
 Source: https://github.com/graingert/django-babel/
 
-Files: debian/*
-Copyright: (c) 2015-2016, Thomas Goirand <zigo@debian.org>
-License: BSD-3-clause
-
 Files: *
 Copyright: (c) 2013-2015, Christopher Grebs <cg@webshox.org>
            (c) 2013-2015, django-babel Team
+License: BSD-3-clause
+
+Files: debian/*
+Copyright: (c) 2015-2016, Thomas Goirand <zigo@debian.org>
 License: BSD-3-clause
 
 License: BSD-3-clause

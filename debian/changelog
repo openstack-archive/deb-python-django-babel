@@ -10,7 +10,10 @@ python-django-babel (0.5.1-1) experimental; urgency=medium
   * Package new release.
   * Add myself to uploaders field.
 
- -- Ivan Udovichenko <iudovichenko@mirantis.com>  Tue, 14 Jun 2016 13:35:11 +0300
+  [ Thomas Goirand ]
+  * Fixed debian/copyright ordering.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 14 Jun 2016 16:02:20 +0000
 
 python-django-babel (0.4.0-1) unstable; urgency=medium
 
